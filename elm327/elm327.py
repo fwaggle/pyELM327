@@ -116,3 +116,74 @@ class ELM327:
 				'value': val,
 				'name': pid['Name'],
 				'units': pid['Units']}
+
+	def fetchDTCs(self):
+		classes = {
+			'0': 'P0',
+			'1': 'P1',
+			'2': 'P2',
+			'3': 'P3',
+			'4': 'C0',
+			'5': 'C1',
+			'6': 'C2',
+			'7': 'C3',
+			'8': 'B0',
+			'9': 'B1',
+			'A': 'B2',
+			'B': 'B3',
+			'C': 'U0',
+			'D': 'U1',
+			'E': 'U2',
+			'F': 'U3',
+		}
+
+		self.write('0101')
+		result = self.expect('^41 01')
+
+		# Test data
+		#result = '41 01 82 07 65 04 '
+
+		if result == None:
+			return 'NO DATA'
+
+		m = re.match('^41 01 ([A-Z0-9]{2})', result)
+		if m.group(0) == None:
+			return 'Malformed response'
+
+		cel = int(m.group(1), 16) & 0x80
+		count = int(m.group(1), 16) - cel
+		cel = cel / 0x80
+
+		print ("CEL: %d DTC Count: %d" % (cel, count))
+
+		if count < 1:
+			return
+
+		self.write('03')
+		result = self.expect('^43 ')
+
+		# Test data
+		#result = '43 01 33 81 34 00 00 '
+
+		pprint.pprint(result)
+
+		m = re.match('^43 (([A-Z0-9]{2} [A-Z0-9]{2} )+)', result)
+		if m.group(0) == None:
+			return
+
+		#print m.group(1)
+
+		"""
+		NOTE: I don't actually know if the last three digits of the DTC
+		are to be interpreted as decimals or HEX, and the ELM327 datasheet
+		is ambiguous. Assuming the former for the time being.
+		"""
+
+		dtcs = re.findall('([A-Z0-9]{2} [A-Z0-9]{2}) ', m.group(1))
+		ret = []
+		for dtc in dtcs:
+			if dtc != '00 00':
+				cls = dtc[0:1]
+				ret.append("%s%s" % (classes[cls], dtc[1:].replace(' ', '')))
+
+		return ret
