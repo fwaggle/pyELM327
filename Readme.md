@@ -38,6 +38,7 @@ Other examples can be found in `examples/`
 
 ## Sources and Attributions
 
+* http://elmelectronics.com/DSheets/ELM327DS.pdf
 * https://www.sparkfun.com/datasheets/Widgets/ELM327_AT_Commands.pdf
 * http://www.obdsol.com/knowledgebase/obd-software-development/reading-real-time-data/
 * https://en.wikipedia.org/wiki/OBD-II_PIDs
