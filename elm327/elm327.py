@@ -103,14 +103,14 @@ class ELM327:
 		# result = '41 0C 0E 5A '
 
 		if result == None:
-			return 'NO DATA'
+			val = 'NO DATA'
+		else:
+			# Apply the pattern to the response
+			m = re.match(pid['Pattern'], result)
+			if m.group(0) == None:
+				raise Exception('Malformed response')
 
-		# Apply the pattern to the response
-		m = re.match(pid['Pattern'], result)
-		if m.group(0) == None:
-			raise Exception('Malformed response')
-
-		val = pid['Value'](m)
+			val = pid['Value'](m)
 		
 		return {'pid': reqPID,
 				'value': val,

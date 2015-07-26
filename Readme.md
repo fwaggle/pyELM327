@@ -1,5 +1,10 @@
 # pyELM327 - A Python interface to Generic OBD2 Devices
 
+Frustrated with the quality of free OBD2 software, I decided to write my own.
+This involved learning how the ELM327 interface works, and in the meantime I
+figured I'd simply provide an API to access the ELM327 device
+programmatically, which I can then wrap a UI around.
+
 **Note: This is a work in progress, please don't expect it to be complete.
 
 It's also very poorly tested, using only the platforms and vehicles I had
@@ -28,3 +33,5 @@ with elm327.ELM327(2) as elm:
 
 The argument 2 is the port, per the pySerial specifications (COM3 in this
 case). You can also specify the baud rate and other serial port options.
+
+Other examples can be found in `examples/`
