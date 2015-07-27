@@ -16,5 +16,5 @@ with elm327.ELM327(2) as elm:
 		for pid in pids.__pids[0x01]:
 			res = elm.fetchLiveData(pid)
 			print("%s: %s %s" % (res['name'], res['value'], res['units']))
-			time.sleep(0.2) # May need adjusting, depending on your ELM327
+			time.sleep(1) # May need adjusting, depending on your ELM327
 		print("")

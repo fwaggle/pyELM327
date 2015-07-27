@@ -36,6 +36,7 @@ class ELM327:
 		self.empty()
 
 		# Set protocol == AUTO for a sensible default
+		# My holden is then AUTO, SAE J1850 VPW
 		self.write('ATSP 0')
 		self.expect('^OK')
 		self.empty()
@@ -59,6 +60,7 @@ class ELM327:
 
 	def write(self, data):
 		# print (">>> %s" % data)
+		self.empty()
 		self.__ser.flushOutput()
 		self.__ser.write(data + '\r\n')
 
