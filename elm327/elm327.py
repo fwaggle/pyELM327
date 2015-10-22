@@ -77,13 +77,13 @@ class ELM327:
 					for l in lines:
 						if re.search('^UNABLE TO CONNECT', l):
 							self.readBuffer = ''
-							return None
+							return 'UNABLE TO CONNECT'
 						if re.search('^NO DATA', l):
 							self.readBuffer = ''
 							return None
 						if re.search('^STOPPED', l):
 							self.readBuffer = ''
-							return None
+							return 'STOPPED'
 						if re.search(pattern, l):
 							self.readBuffer = ''
 							return l
@@ -108,10 +108,14 @@ class ELM327:
 
 		if result == None:
 			val = 'NO DATA'
+		elif result == 'STOPPED':
+			raise Exception('STOPPED')
+		elif result == 'UNABLE TO CONNECT':
+			raise Exception('UNABLE TO CONNECT')
 		else:
 			# Apply the pattern to the response
 			m = re.match(pid['Pattern'], result)
-			if m.group(0) == None:
+			if m == None or m.group(0) == None:
 				raise Exception('Malformed response')
 
 			val = pid['Value'](m)
@@ -149,10 +153,14 @@ class ELM327:
 
 		if result == None:
 			return 'NO DATA'
+		if result == 'STOPPED':
+			raise Exception('STOPPED')
+		if result == 'UNABLE TO CONNECT':
+			raise Exception('UNABLE TO CONNECT')
 
 		m = re.match('^41 01 ([A-Z0-9]{2})', result)
-		if m.group(0) == None:
-			return 'Malformed response'
+		if m == None or m.group(0) == None:
+			raise Exception('Malformed response')
 
 		cel = int(m.group(1), 16) & 0x80
 		count = int(m.group(1), 16) - cel
@@ -172,7 +180,7 @@ class ELM327:
 		pprint.pprint(result)
 
 		m = re.match('^43 (([A-Z0-9]{2} [A-Z0-9]{2} )+)', result)
-		if m.group(0) == None:
+		if m == None or m.group(0) == None:
 			return
 
 		#print m.group(1)
