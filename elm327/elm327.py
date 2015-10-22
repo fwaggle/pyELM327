@@ -18,7 +18,9 @@ class ELM327:
 
 	def __init__(self, port, baud=38400, rtscts=0, xonxoff=0):
 		self.__ser = serial.Serial(port, baud, timeout=5, rtscts=rtscts, xonxoff=xonxoff)
+		self.reset()
 
+	def reset(self):
 		"""
 			Try to put the ELM327 device into a known state, by resetting
 			it then turning off echos.
@@ -98,7 +100,7 @@ class ELM327:
 		pid = pidlist[0x01][reqPID]
 
 		# Request the data
-		self.write('01%02x' % reqPID)
+		self.write('01%02x1' % reqPID)
 		result = self.expect('^41 ')
 
 		# Test Data
