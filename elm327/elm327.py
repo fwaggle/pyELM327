@@ -6,11 +6,6 @@ http://github.com/fwaggle/pyELM327
 Please see License.txt and Readme.md.
 """
 
-"""@package elm327
-
-Test
-"""
-
 import serial, time, pprint, re
 import pids
 
@@ -21,7 +16,7 @@ class ELM327:
 	"""
 	ELM327 Class
 
-	Test 123
+	Meta-class for abstracting ELM327 device.
 	"""
 	__ser = None # pySerial object.
 	readBuffer = ''
