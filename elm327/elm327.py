@@ -24,9 +24,9 @@ class ELM327:
 	__debug = 0
 
 	def __init__(self, port, debug=0, baud=38400, rtscts=0, xonxoff=0):
+		self.__debug = debug
 		self.__ser = serial.Serial(port, baud, timeout=5, rtscts=rtscts, xonxoff=xonxoff)
 		self.reset()
-		self.__debug = debug
 
 	def reset(self):
 		"""
