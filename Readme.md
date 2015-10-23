@@ -28,11 +28,11 @@ pyELM327 supports Python's Context Manager, so you can do stuff like this:
 import elm327
 
 with elm327.ELM327(2) as elm:
-	elm.write('ATZ')
+	print elm.fetchBatteryLevel()
 ```
 
 The argument 2 is the port, per the pySerial specifications (COM3 in this
-case). On Linux I replace 2 with '/dev/ttyUSB0'. You can also specify the baud rate and other serial port options.
+case). On Linux replace 2 with '/dev/ttyUSB0'. You can also specify the baud rate and other serial port options.
 
 Other examples can be found in `examples/`
 
