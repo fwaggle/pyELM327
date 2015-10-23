@@ -210,3 +210,11 @@ class ELM327:
 				ret.append("%s%s" % (classes[cls], dtc[1:].replace(' ', '')))
 
 		return ret
+
+	def clearDTCs(self, confirm=0):
+		if confirm:
+			self.write('04')
+			result = self.expect('^44')
+			return result
+		else:
+			raise Exception('Confirm clear DTCs?')
