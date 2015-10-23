@@ -36,6 +36,16 @@ case). On Linux replace 2 with '/dev/ttyUSB0'. You can also specify the baud rat
 
 Other examples can be found in `examples/`
 
+## Known Bugs and Issues
+
+* I've changed the write() routine to wait for a '>' before sending, but this may have broken something. For example, turning off echos breaks things for some commands, so I've disabled that and we just eat the echos now.
+
+* We don't cope with changing baudrates terribly well at all - need support for polling the baudrate so we can reset a device with a non-default baud rate.
+
+* Haven't tested DTC retrieval, because I haven't yet managed to throw a code on any of my cars. I might just unplug the MAF.
+
+* Documentation is appalling.
+
 ## Sources and Attributions
 
 * http://elmelectronics.com/DSheets/ELM327DS.pdf
