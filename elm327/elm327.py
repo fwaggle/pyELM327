@@ -150,11 +150,13 @@ class ELM327(object):
 					self.readBuffer = self.readBuffer[self.readBuffer.find('\r')+1:]
 
 					if re.search('^UNABLE TO CONNECT', l):
-						return 'UNABLE TO CONNECT'
+						raise Exception('UNABLE TO CONNECT')
 					if re.search('^NO DATA', l):
 						return None
 					if re.search('^STOPPED', l):
-						return 'STOPPED'
+						raise Exception('STOPPED')
+					if re.search('^\?', l):
+						raise Exception('UNKNOWN COMMAND')
 					if re.search(pattern, l):
 						return l
 			
@@ -194,10 +196,6 @@ class ELM327(object):
 
 		if result == None:
 			val = 'NO DATA'
-		elif result == 'STOPPED':
-			raise Exception('STOPPED')
-		elif result == 'UNABLE TO CONNECT':
-			raise Exception('UNABLE TO CONNECT')
 		else:
 			# Apply the pattern to the response
 			m = re.match(pid['Pattern'], result)
@@ -245,10 +243,6 @@ class ELM327(object):
 
 		if result == None:
 			return 'NO DATA'
-		if result == 'STOPPED':
-			raise Exception('STOPPED')
-		if result == 'UNABLE TO CONNECT':
-			raise Exception('UNABLE TO CONNECT')
 
 		m = re.match('^41 01 ([A-Z0-9]{2})', result)
 		if m == None or m.group(0) == None:
