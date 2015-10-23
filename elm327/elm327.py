@@ -94,9 +94,7 @@ class ELM327:
 	def fetchBatteryLevel(self):
 		self.write('AT RV')
 		result = self.expect('^[0-9\.]+V')
-
 		return result
-
 
 	def fetchLiveData(self, reqPID):
 		global pidlist # Nasty, but I don't know a better way yet
