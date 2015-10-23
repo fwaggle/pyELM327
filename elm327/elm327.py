@@ -6,12 +6,23 @@ http://github.com/fwaggle/pyELM327
 Please see License.txt and Readme.md.
 """
 
+"""@package elm327
+
+Test
+"""
+
 import serial, time, pprint, re
 import pids
 
 pidlist = pids.__pids
 
+
 class ELM327:
+	"""
+	ELM327 Class
+
+	Test 123
+	"""
 	__ser = None # pySerial object.
 	readBuffer = ''
 	id = None
@@ -24,12 +35,12 @@ class ELM327:
 
 	def reset(self):
 		"""
-			Try to put the ELM327 device into a known state, by resetting
-			it then turning off echos.
-
-			'ATZ' will, depending on the status of the device's echo setting
-			return either just the device ID, or 'ATZ\r' followed by the ID.
+		Try to put the ELM327 device into a known state, by resetting
+		it then turning off echos.
 		"""
+
+		# 'ATZ' will, depending on the status of the device's echo setting
+		# return either just the device ID, or 'ATZ\r' followed by the ID.
 		self.write('ATZ')
 		self.id = self.expect('^ELM327') # Expecting 'ELM327 v1.5'
 		self.empty()
@@ -50,8 +61,8 @@ class ELM327:
 
 	def empty(self):
 		"""
-			empties the read buffer - ensures we don't leave data in the way
-			if a cheap-shit ELM327 clone doesn't respond within 1 second.
+		Empty the read buffer - ensures we don't leave data in the way
+		if a cheap-shit ELM327 clone doesn't respond within 1 second.
 		"""
 		self.__ser.flushInput()
 		self.readBuffer = ''
@@ -63,6 +74,9 @@ class ELM327:
 		self.close()
 
 	def write(self, data):
+		"""
+		Send raw data to the ELM327. For most features this shouldn't be necessary.
+		"""
 		if self.__debug:
 			print (">>> %s" % data)
 		self.empty()
@@ -98,11 +112,19 @@ class ELM327:
 			time.sleep(0.1)
 
 	def fetchBatteryLevel(self):
+		"""
+		Fetch the battery level from the ELM327.
+		"""
 		self.write('AT RV')
 		result = self.expect('^[0-9\.]+V')
 		return result
 
 	def fetchLiveData(self, reqPID):
+		"""
+		Fetch Live Data at the requested PID from ECU.
+
+
+		"""
 		global pidlist # Nasty, but I don't know a better way yet
 		
 		if reqPID not in pidlist[0x01]:
@@ -137,6 +159,12 @@ class ELM327:
 				'units': pid['Units']}
 
 	def fetchDTCs(self):
+		"""
+		Fetch Diagnostic Trouble Codes from the ECU.
+
+		Currently this function prints out the count of DTCs and the status of the
+		MIL, but this behaviour will change eventually.
+		"""
 		classes = {
 			'0': 'P0',
 			'1': 'P1',
@@ -212,6 +240,13 @@ class ELM327:
 		return ret
 
 	def clearDTCs(self, confirm=0):
+		"""
+		Clear Diagnostic Trouble Codes from the ECU.
+
+		The software is responsible for confirming that this is what the user
+		actually intends to do - you must pass a "confirm" argument to get it to
+		clear the codes, otherwise an exception is raised.
+		"""
 		if confirm:
 			self.write('04')
 			result = self.expect('^44')
