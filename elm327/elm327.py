@@ -49,21 +49,33 @@ class ELM327(object):
 		self.write('ATSP 0')
 		self.expect('^OK')
 
-	def setHighspeed(self):
-		# set the baud rate timeout - python isn't fast enough for 75ms
+	def tryBaudrate(self, rate=38400):
+		# Select appropriate divisor
+		if rate == 38400:
+			divisor = '26'
+		elif rate == 115200:
+			divisor = '23'
+		else:
+			raise Exception('Baud rate not implemented')
+
+		# set the baud rate timeout - my python code isn't fast enough for 75ms
+		# without getting the response in the old baud rate
 		self.write('ATBRT 00')
 		result = self.expect('^OK')
 
 		# try to set the baud rate to 115200
-		self.write('ATBRD 23')
+		self.write('ATBRD ' + divisor)
 		result = self.expect('^OK')
 		print "result: %s" % result
-		self.baudrate = 115200
-
-		print "Baud: %d" % self.__ser.baudrate
+		self.baudrate = rate
 		
 		# we should get ELM327 at the new baud rate if it worked.
 		result = self.expect('^ELM327')
+
+		print "Res: %s" % result
+
+		# if we get header at new baud rate, ELM is expecting CR at new baud rate.
+		self.write('', 1)
 		print "result: %s" % result
 
 	@property
@@ -83,7 +95,7 @@ class ELM327(object):
 		for no good reason.
 		"""
 		self.write('ATDP')
-		self.expect('^>ATDP')
+		self.expect('^(>)?ATDP')
 		result = self.expect('^.')
 		return result
 
@@ -118,6 +130,8 @@ class ELM327(object):
 		self.__ser.write(data + '\r')
 
 	def expect(self, pattern):
+		if self.__debug:
+			print "Expect: '%s'" % pattern
 		while True:
 			n = self.__ser.inWaiting()
 			if n > 0:
