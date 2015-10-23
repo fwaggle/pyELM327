@@ -115,7 +115,7 @@ class ELM327(object):
 			self.expect('>')
 
 		self.__ser.flushOutput()
-		self.__ser.write(data + '\r\n')
+		self.__ser.write(data + '\r')
 
 	def expect(self, pattern):
 		while True:
