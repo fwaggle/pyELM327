@@ -12,7 +12,7 @@ import pids
 pidlist = pids.__pids
 
 
-class ELM327:
+class ELM327(object):
 	"""
 	ELM327 Class
 
