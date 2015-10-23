@@ -44,6 +44,8 @@ Other examples can be found in `examples/`
 
 * Haven't tested DTC retrieval, because I haven't yet managed to throw a code on any of my cars. I might just unplug the MAF.
 
+* expect() can't deal with failure - it'll simply wait forever for the correct response. This needs fixing pronto as it's blocking other features.
+
 * Documentation is appalling.
 
 ## Sources and Attributions
