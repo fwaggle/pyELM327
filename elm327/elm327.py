@@ -68,13 +68,19 @@ class ELM327:
 	def __exit__(self, exception_type, exception_value, traceback):
 		self.close()
 
-	def write(self, data):
+	def write(self, data, nowait=None):
 		"""
 		Send raw data to the ELM327. For most features this shouldn't be necessary.
 		"""
+
 		if self.__debug:
 			print (">>> %s" % data)
-		self.empty()
+
+		if nowait == None:
+			if self.__debug:
+				print "DEBUG: Waiting for '>'"
+			self.expect('>')
+
 		self.__ser.flushOutput()
 		self.__ser.write(data + '\r\n')
 
@@ -83,26 +89,29 @@ class ELM327:
 			n = self.__ser.inWaiting()
 			if n > 0:
 				self.readBuffer += self.__ser.read(n)
-				if self.readBuffer.count('\r') > 0:
-					lines = self.readBuffer.split('\r')
 
-					if self.__debug:
-						pprint.pprint(lines)
+			if self.readBuffer.count('\r') > 0:
+				lines = self.readBuffer.split('\r')
 
-					for l in lines:
-						if re.search('^UNABLE TO CONNECT', l):
-							self.readBuffer = ''
-							return 'UNABLE TO CONNECT'
-						if re.search('^NO DATA', l):
-							self.readBuffer = ''
-							return None
-						if re.search('^STOPPED', l):
-							self.readBuffer = ''
-							return 'STOPPED'
-						if re.search(pattern, l):
-							self.readBuffer = ''
-							return l
-					self.readBuffer = ''
+				if self.__debug:
+					pprint.pprint(lines)
+
+				for l in lines:
+					# drop each line from the read buffer as we process it.
+					self.readBuffer = self.readBuffer[self.readBuffer.find('\r')+1:]
+
+					if re.search('^UNABLE TO CONNECT', l):
+						return 'UNABLE TO CONNECT'
+					if re.search('^NO DATA', l):
+						return None
+					if re.search('^STOPPED', l):
+						return 'STOPPED'
+					if re.search(pattern, l):
+						return l
+			
+			if self.readBuffer == '>' and pattern == '>':
+				self.readBuffer = ''
+				return '>'
 
 			time.sleep(0.1)
 
