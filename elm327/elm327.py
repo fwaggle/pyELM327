@@ -103,6 +103,8 @@ class ELM327(object):
 		"""
 		Empty the read buffer - ensures we don't leave data in the way
 		if a cheap-shit ELM327 clone doesn't respond within 1 second.
+
+		This function is deprecated as our buffer code is a lot nicer now.
 		"""
 		self.__ser.flushInput()
 		self.readBuffer = ''
