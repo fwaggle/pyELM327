@@ -15,10 +15,12 @@ class ELM327:
 	__ser = None # pySerial object.
 	readBuffer = ''
 	id = None
+	__debug = 0
 
-	def __init__(self, port, baud=38400, rtscts=0, xonxoff=0):
+	def __init__(self, port, debug=0, baud=38400, rtscts=0, xonxoff=0):
 		self.__ser = serial.Serial(port, baud, timeout=5, rtscts=rtscts, xonxoff=xonxoff)
 		self.reset()
+		self.__debug = debug
 
 	def reset(self):
 		"""
@@ -61,7 +63,8 @@ class ELM327:
 		self.close()
 
 	def write(self, data):
-		# print (">>> %s" % data)
+		if self.__debug:
+			print (">>> %s" % data)
 		self.empty()
 		self.__ser.flushOutput()
 		self.__ser.write(data + '\r\n')
@@ -73,7 +76,10 @@ class ELM327:
 				self.readBuffer += self.__ser.read(n)
 				if self.readBuffer.count('\r') > 0:
 					lines = self.readBuffer.split('\r')
-					# pprint.pprint(lines)
+
+					if self.__debug:
+						pprint.pprint(lines)
+
 					for l in lines:
 						if re.search('^UNABLE TO CONNECT', l):
 							self.readBuffer = ''
