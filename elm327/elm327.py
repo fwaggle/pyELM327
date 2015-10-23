@@ -36,23 +36,56 @@ class ELM327:
 
 		# 'ATZ' will, depending on the status of the device's echo setting
 		# return either just the device ID, or 'ATZ\r' followed by the ID.
-		self.write('ATZ')
+		self.write('ATZ', nowait=1)
 		self.id = self.expect('^ELM327') # Expecting 'ELM327 v1.5'
-		self.empty()
 
 		# turn off echos
-		self.write('ATE0')
-		self.expect('^OK') # should be 'OK'
-		self.empty()
+#		self.write('ATE0')
+#		self.expect('^OK') # should be 'OK'
+#		self.expect('>')
 
 		# Set protocol == AUTO for a sensible default
 		# My holden is then AUTO, SAE J1850 VPW
 		self.write('ATSP 0')
 		self.expect('^OK')
-		self.empty()
+
+	def setHighspeed(self):
+		# set the baud rate timeout - python isn't fast enough for 75ms
+		self.write('ATBRT 00')
+		result = self.expect('^OK')
+
+		# try to set the baud rate to 115200
+		self.write('ATBRD 23')
+		result = self.expect('^OK')
+		print "result: %s" % result
+		self.baudrate = 115200
+
+		print "Baud: %d" % self.__ser.baudrate
+		
+		# we should get ELM327 at the new baud rate if it worked.
+		result = self.expect('^ELM327')
+		print "result: %s" % result
+
+	@property
+	def baudrate(self):
+	    return self.__ser.baudrate
+
+	@baudrate.setter
+	def baudrate(self, rate):
+		self.__ser.baudrate = rate
 
 	def close(self):
 		self.__ser.close()
+
+	def fetchProtocol(self):
+		"""
+		Describe the Protocol used by the ELM327, most of the time this will return AUTO
+		for no good reason.
+		"""
+		self.write('ATDP')
+		self.expect('^>ATDP')
+		result = self.expect('^.')
+		return result
 
 	def empty(self):
 		"""
