@@ -19,9 +19,11 @@ class ELM327(object):
 	Meta-class for abstracting ELM327 device.
 	"""
 	__ser = None # pySerial object.
-	readBuffer = ''
-	id = None
+	__readBuffer = ''
 	__debug = 0
+
+	id = None
+
 
 	def __init__(self, port, debug=0, baud=38400, rtscts=0, xonxoff=0):
 		self.__debug = debug
@@ -124,7 +126,7 @@ class ELM327(object):
 		This function is deprecated as our buffer code is a lot nicer now.
 		"""
 		self.__ser.flushInput()
-		self.readBuffer = '>' # kludge, I can't find a noop in the ELM327 commandset
+		self.__readBuffer = '>' # kludge, I can't find a noop in the ELM327 commandset
 
 	def __enter__(self):
 		return self
@@ -154,17 +156,17 @@ class ELM327(object):
 		while True:
 			n = self.__ser.inWaiting()
 			if n > 0:
-				self.readBuffer += self.__ser.read(n)
+				self.__readBuffer += self.__ser.read(n)
 
-			if self.readBuffer.count('\r') > 0:
-				lines = self.readBuffer.split('\r')
+			if self.__readBuffer.count('\r') > 0:
+				lines = self.__readBuffer.split('\r')
 
 				if self.__debug:
 					pprint.pprint(lines)
 
 				for l in lines:
 					# drop each line from the read buffer as we process it.
-					self.readBuffer = self.readBuffer[self.readBuffer.find('\r')+1:]
+					self.__readBuffer = self.__readBuffer[self.__readBuffer.find('\r')+1:]
 
 					if re.search('^UNABLE TO CONNECT', l):
 						raise Exception('UNABLE TO CONNECT')
@@ -177,8 +179,8 @@ class ELM327(object):
 					if re.search(pattern, l):
 						return l
 			
-			if (self.readBuffer == '>' or self.readBuffer == '\r>') and pattern == '>':
-				self.readBuffer = ''
+			if (self.__readBuffer == '>' or self.__readBuffer == '\r>') and pattern == '>':
+				self.__readBuffer = ''
 				return '>'
 
 			time.sleep(0.1)
