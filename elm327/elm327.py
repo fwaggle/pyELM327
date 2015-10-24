@@ -90,11 +90,14 @@ class ELM327(object):
 		# without getting the response in the old baud rate
 		self.write('ATBRT 00')
 		result = self.expect('^OK')
+		if result != 'OK':
+			raise Exception('Couldn\'t set Baud Rate Timeout (AT BRT)')
 
 		# try to set the baud rate to 115200
 		self.write('ATBRD ' + divisor)
 		result = self.expect('^OK')
-		print "result: %s" % result
+		if result != 'OK':
+			raise Exception('Couldn\'t set Baud Rate Divisor (AT BRD)')
 		self.baudrate = rate
 		
 		# we should get ELM327 at the new baud rate if it worked.

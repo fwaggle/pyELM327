@@ -46,6 +46,8 @@ Other examples can be found in `examples/`
 
 * expect() can't deal with failure - it'll simply wait forever for the correct response. This needs fixing pronto as it's blocking other features.
 
+* Need to implement proper exceptions.
+
 * Documentation is appalling.
 
 ## Sources and Attributions
