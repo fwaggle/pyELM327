@@ -51,13 +51,13 @@ class ELM327(object):
 
 		# turn off echos
 		self.write('ATE0')
-		self.expect('^(>)?OK') # should be 'OK'
+		self.expect('^OK') # should be 'OK'
 		self.expect('>')
 
 		# Set protocol == AUTO for a sensible default
 		# My holden is then AUTO, SAE J1850 VPW
 		self.write('ATSP 0')
-		self.expect('^(>)?OK')
+		self.expect('^OK')
 
 	def tryBaudrate(self, rate=38400):
 		"""
@@ -89,11 +89,11 @@ class ELM327(object):
 		# set the baud rate timeout - my python code isn't fast enough for 75ms
 		# without getting the response in the old baud rate
 		self.write('ATBRT 00')
-		result = self.expect('^(>)?OK')
+		result = self.expect('^OK')
 
 		# try to set the baud rate to 115200
 		self.write('ATBRD ' + divisor)
-		result = self.expect('^(>)?OK')
+		result = self.expect('^OK')
 		print "result: %s" % result
 		self.baudrate = rate
 		
@@ -123,7 +123,7 @@ class ELM327(object):
 		for no good reason.
 		"""
 		self.write('ATDP')
-		result = self.expect('^>?(.+)$')
+		result = self.expect('^(.+)$')
 		return result
 
 	def empty(self):
