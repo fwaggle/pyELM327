@@ -40,14 +40,14 @@ class ELM327(object):
 		self.id = self.expect('^ELM327') # Expecting 'ELM327 v1.5'
 
 		# turn off echos
-#		self.write('ATE0')
-#		self.expect('^OK') # should be 'OK'
-#		self.expect('>')
+		self.write('ATE0')
+		self.expect('^(>)?OK') # should be 'OK'
+		self.expect('>')
 
 		# Set protocol == AUTO for a sensible default
 		# My holden is then AUTO, SAE J1850 VPW
 		self.write('ATSP 0')
-		self.expect('^OK')
+		self.expect('^(>)?OK')
 
 	def tryBaudrate(self, rate=38400):
 		"""
@@ -79,11 +79,11 @@ class ELM327(object):
 		# set the baud rate timeout - my python code isn't fast enough for 75ms
 		# without getting the response in the old baud rate
 		self.write('ATBRT 00')
-		result = self.expect('^OK')
+		result = self.expect('^(>)?OK')
 
 		# try to set the baud rate to 115200
 		self.write('ATBRD ' + divisor)
-		result = self.expect('^OK')
+		result = self.expect('^(>)?OK')
 		print "result: %s" % result
 		self.baudrate = rate
 		
@@ -113,8 +113,7 @@ class ELM327(object):
 		for no good reason.
 		"""
 		self.write('ATDP')
-		self.expect('^(>)?ATDP')
-		result = self.expect('^.')
+		result = self.expect('^>?(.+)$')
 		return result
 
 	def empty(self):
@@ -126,6 +125,7 @@ class ELM327(object):
 		"""
 		self.__ser.flushInput()
 		self.readBuffer = ''
+		self.write(' \r', 1)
 
 	def __enter__(self):
 		return self
@@ -173,12 +173,12 @@ class ELM327(object):
 						return None
 					if re.search('^STOPPED', l):
 						raise Exception('STOPPED')
-					if re.search('^\?', l):
+					if re.search('^(>)?\?', l):
 						raise Exception('UNKNOWN COMMAND')
 					if re.search(pattern, l):
 						return l
 			
-			if self.readBuffer == '>' and pattern == '>':
+			if (self.readBuffer == '>' or self.readBuffer == '\r>') and pattern == '>':
 				self.readBuffer = ''
 				return '>'
 
