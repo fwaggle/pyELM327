@@ -173,6 +173,10 @@ class ELM327(object):
 					pprint.pprint(lines)
 
 				for l in lines:
+					# chomp beginning '>' if present
+					if len(l) > 1 and l[0] == '>':
+						l = l[1:]
+
 					# drop each line from the read buffer as we process it.
 					self.__readBuffer = self.__readBuffer[self.__readBuffer.find('\r')+1:]
 
@@ -182,7 +186,7 @@ class ELM327(object):
 						return None
 					if re.search('^STOPPED', l):
 						raise Exception('STOPPED')
-					if re.search('^(>)?\?', l):
+					if re.search('^\?', l):
 						raise Exception('UNKNOWN COMMAND')
 					if re.search(pattern, l):
 						return l
