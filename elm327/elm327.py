@@ -124,8 +124,7 @@ class ELM327(object):
 		This function is deprecated as our buffer code is a lot nicer now.
 		"""
 		self.__ser.flushInput()
-		self.readBuffer = ''
-		self.write(' \r', 1)
+		self.readBuffer = '>' # kludge, I can't find a noop in the ELM327 commandset
 
 	def __enter__(self):
 		return self
