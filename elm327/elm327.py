@@ -50,11 +50,29 @@ class ELM327(object):
 		self.expect('^OK')
 
 	def tryBaudrate(self, rate=38400):
-		# Select appropriate divisor
+		"""
+		Try a faster baud rate for the PC->ELM327 connection. Depending on your hardware,
+		this may not work - for example Bluetooth adaptors are notoriously shit.
+
+		Note that you can't specify 9600 baud - that requires a divisor higher than FF.
+
+		If your device starts in 9600 baud (a hardware pin setting), simply init the ELM327
+		class with baudrate=9600 and if higher baud rates don't work reset it with ATZ. 
+		If it starts in 38400 baud, and you don't get a stable connection, throw the device
+		away and buy a better one.
+		"""
+		
+		# Select appropriate divisor - higher rates may cause a '?' response from ELM
 		if rate == 38400:
-			divisor = '26'
+			divisor = '69'
+		elif rate == 57600:
+			divisor = '45'
 		elif rate == 115200:
 			divisor = '23'
+		elif rate == 500000:
+			divisor = '08'
+		elif rate == 666700:
+			divisor = '06'
 		else:
 			raise Exception('Baud rate not implemented')
 
