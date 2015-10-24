@@ -30,15 +30,23 @@ class ELM327(object):
 		self.__ser = serial.Serial(port, baud, timeout=5, rtscts=rtscts, xonxoff=xonxoff)
 		self.reset()
 
-	def reset(self):
+	def reset(self, warm=0):
 		"""
-		Try to put the ELM327 device into a known state, by resetting
-		it then turning off echos.
+		Try to put the ELM327 device into a known state, by resetting it then 
+		turning off echos.
+
+		If the "warm" parameter is non-zero, don't do a full reset - useful for
+		keeping custom baud rates and so on.
 		"""
 
 		# 'ATZ' will, depending on the status of the device's echo setting
 		# return either just the device ID, or 'ATZ\r' followed by the ID.
-		self.write('ATZ', nowait=1)
+		# 'ATWS' is preferred if we've changed the baud rate because it doesn't
+		# reset all the things.
+		if warm:
+			self.write('ATWS', nowait=1)
+		else:
+			self.write('ATZ', nowait=1)
 		self.id = self.expect('^ELM327') # Expecting 'ELM327 v1.5'
 
 		# turn off echos
