@@ -38,13 +38,9 @@ Other examples can be found in `examples/`
 
 ## Known Bugs and Issues
 
-* I've changed the write() routine to wait for a '>' before sending, but this may have broken something. For example, turning off echos breaks things for some commands, so I've disabled that and we just eat the echos now.
-
-* We don't cope with changing baudrates terribly well at all - need support for polling the baudrate so we can reset a device with a non-default baud rate.
+* We don't cope with changing baudrates terribly well at all - need support for polling the baudrate so we can reset a device with a non-default baud rate. It works as long as nothing goes wrong.
 
 * Haven't tested DTC retrieval, because I haven't yet managed to throw a code on any of my cars. I might just unplug the MAF.
-
-* expect() can't deal with failure - it'll simply wait forever for the correct response. This needs fixing pronto as it's blocking other features.
 
 * Need to implement proper exceptions.
 
