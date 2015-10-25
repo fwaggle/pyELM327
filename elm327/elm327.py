@@ -47,17 +47,23 @@ class ELM327(object):
 			self.write('ATWS', nowait=1)
 		else:
 			self.write('ATZ', nowait=1)
-		self.id = self.expect('^ELM327') # Expecting 'ELM327 v1.5'
+		self.id = self.expect('^ELM327', 2000) # Expecting 'ELM327 v1.5'
+		if self.id[0:6] != 'ELM327':
+			raise Exception('Didn\'t get expected header from device - not responding?')
 
 		# turn off echos
 		self.write('ATE0')
-		self.expect('^OK') # should be 'OK'
-		self.expect('>')
+		result = self.expect('^OK', 200) # should be 'OK'
+		if result != 'OK':
+			raise Exception('Turning off Echo (AT E0) failed.')
 
 		# Set protocol == AUTO for a sensible default
 		# My holden is then AUTO, SAE J1850 VPW
 		self.write('ATSP 0')
-		self.expect('^OK')
+		result = self.expect('^OK', 200)
+		if result != 'OK':
+			raise Exception('Setting Protocol to AUTO failed.')
+
 
 	def tryBaudrate(self, rate=38400):
 		"""
@@ -128,7 +134,7 @@ class ELM327(object):
 		for no good reason.
 		"""
 		self.write('ATDP')
-		result = self.expect('^(.+)$')
+		result = self.expect('^(.+)$', 200)
 		return result
 
 	def empty(self):
@@ -235,7 +241,7 @@ class ELM327(object):
 		Fetch the battery level from the ELM327.
 		"""
 		self.write('AT RV')
-		result = self.expect('^[0-9\.]+V')
+		result = self.expect('^[0-9\.]+V', 5000)
 		return result
 
 	def fetchSupportedPIDsLive(self):
@@ -254,7 +260,7 @@ class ELM327(object):
 		# send request for first batch
 		for i in range(0, 0x81, 32):
 			self.write('01 %2X' % i)
-			result = self.expect('^41 ')
+			result = self.expect('^41 ', 5000)
 			#result = '%2X BE 1F A8 13' % i # test data from Wikipedia
 			result = result[3:] # chomp response header
 
@@ -284,7 +290,7 @@ class ELM327(object):
 
 		# Request the data
 		self.write('01%02x1' % reqPID)
-		result = self.expect('^41 ')
+		result = self.expect('^41 ', 5000)
 
 		# Test Data
 		# result = '41 0C 0E 5A '
@@ -331,7 +337,7 @@ class ELM327(object):
 		}
 
 		self.write('0101')
-		result = self.expect('^41 01')
+		result = self.expect('^41 01', 5000)
 
 		# Test data
 		#result = '41 01 82 07 65 04 '
@@ -353,7 +359,7 @@ class ELM327(object):
 			return
 
 		self.write('03')
-		result = self.expect('^43 ')
+		result = self.expect('^43 ', 5000)
 
 		# Test data
 		#result = '43 01 33 81 34 00 00 '
@@ -391,7 +397,7 @@ class ELM327(object):
 		"""
 		if confirm:
 			self.write('04')
-			result = self.expect('^44')
+			result = self.expect('^44', 5000)
 			return result
 		else:
 			raise Exception('Confirm clear DTCs?')
