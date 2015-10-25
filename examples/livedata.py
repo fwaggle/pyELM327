@@ -15,13 +15,20 @@ with elm327.ELM327('/dev/ttyUSB0', debug=0) as elm:
 	# plugging it back in. Or, simply comment this line out, because at the
 	# time of writing we don't run out of bandwidth for the speed we're
 	# polling the PIDs at.
-	elm.tryBaudrate(500000)
+	#elm.tryBaudrate(500000)
 
 	print("Device reports as: %s @ %d bps" % (elm.id, elm.baudrate))
 
+	supported = elm.fetchSupportedPIDsLive()
+	if supported == None:
+		elm.write('ATZ')
+		exit()
+
 	while True:
+		print("\033[6;3H")
 		# Iteratively fetch all PIDs in Mode 01
-		for pid in pids.__pids[0x01]:
+		for spid in supported:
+			pid = int(spid, 16)
 			try:
 				res = elm.fetchLiveData(pid)
 				if res:
@@ -32,6 +39,3 @@ with elm327.ELM327('/dev/ttyUSB0', debug=0) as elm:
 					time.sleep(1) # wait 1 second before trying again.
 				else:
 					print e
-#			time.sleep(0.5) # May need adjusting, depending on your ELM327
-
-		print("") # Blank line when we start from PID 01 again.

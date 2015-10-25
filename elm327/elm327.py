@@ -257,17 +257,22 @@ class ELM327(object):
 
 		# send request for first batch
 		for i in range(0, 0x81, 32):
-			self.write('01 %2X' % i)
+			self.write('01 %02X1' % i)
 			result = self.expect('^41 ', 5000)
-			#result = '%2X BE 1F A8 13' % i # test data from Wikipedia
-			result = result[3:] # chomp response header
+			#result = '41 %02X BE 1F A8 13' % i # test data from Wikipedia
+			#result = '41 41 00 BF BF F9 90' % i # test data from commodore
 
-			flags = int(result.replace(' ', ''), 16) # convert to integer
+			if result:
+				result = result[6:] # chomp response header
 
-			for flag in range(31, -1, -1): # abomination!
-				enabled = flags & (1 << (flag))
-				if enabled > 0 and (32-flag) + i in pidlist[01]:
-					supported[("%02X" % ((32-flag) + i))] = 1
+				flags = int(result.replace(' ', ''), 16) # convert to integer
+
+				for flag in range(31, -1, -1): # abomination!
+					enabled = flags & (1 << (flag))
+					if enabled and (32-flag) + i in pidlist[01]:
+						supported[("%02X" % ((32-flag) + i))] = 1
+					elif enabled:
+						print "ADD PID %02X" % ((32-flag) + i)
 
 		return supported
 
@@ -291,7 +296,7 @@ class ELM327(object):
 		result = self.expect('^41 ', 5000)
 
 		# Test Data
-		# result = '41 0C 0E 5A '
+		#result = '41 1C 01 '
 
 		if result == None:
 			val = 'NO DATA'
