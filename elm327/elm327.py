@@ -219,22 +219,22 @@ class ELM327(object):
 		we only report the PIDs that the ECU *and* the library supports.
 		"""
 		global pidlist # Nasty, but I don't know a better way yet
-
-		# send request
-		self.write('0100')
-		result = self.expect('^41 ')
-		#result = '41 BE 1F A8 13' # test data from Wikipedia
-		result = result[3:] # chomp response header
-
-		flags = int(result.replace(' ', ''), 16) # convert to integer
 		supported = dict()
 
-		for flag in range(31, -1, -1): # abomination!
-			enabled = flags & (1 << (flag))
-			if enabled > 0 and 32-flag in pidlist[01]:
-				supported[("%02X" % (32-flag))] = 1
-			#else:
-			#	supported[32-flag] = 0
+		# send request for first batch
+		for i in range(0, 0x81, 32):
+			print i
+			self.write('01 %2X' % i)
+			result = self.expect('^41 ')
+			#result = '%2X BE 1F A8 13' % i # test data from Wikipedia
+			result = result[3:] # chomp response header
+
+			flags = int(result.replace(' ', ''), 16) # convert to integer
+
+			for flag in range(31, -1, -1): # abomination!
+				enabled = flags & (1 << (flag))
+				if enabled > 0 and (32-flag) + i in pidlist[01]:
+					supported[("%02X" % ((32-flag) + i))] = 1
 
 		return supported
 
