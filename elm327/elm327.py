@@ -11,21 +11,18 @@ import pids
 
 pidlist = pids.__pids
 
-
 class ELM327(object):
 	"""
 	ELM327 Class
 
 	Meta-class for abstracting ELM327 device.
 	"""
-	__ser = None # pySerial object.
-	__readBuffer = ''
-	__debug = 0
-
-	id = None
 
 	def __init__(self, port, debug=0, baud=38400, rtscts=0, xonxoff=0):
 		self.__debug = debug
+		self.id = None
+		self.__readBuffer = ''
+
 		self.__ser = serial.Serial(port, baud, timeout=5, rtscts=rtscts, xonxoff=xonxoff)
 		self.reset()
 
