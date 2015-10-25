@@ -5,21 +5,33 @@ sys.path.append(".")
 sys.path.append("..")
 from elm327 import elm327, pids
 
-with elm327.ELM327('/dev/ttyUSB0') as elm:
+with elm327.ELM327('/dev/ttyUSB0', debug=0) as elm:
+	# Attempt to set a higher baud. Note that this will, when the script is
+	# stopped with CTRL+C, leave the ELM327 in a semi-usable state - it will
+	# still be configured to use the higher baud rate!
 
-	print("Device reports as: %s" % elm.id)
+	# So next time around you'll have to either initialize the ELM327 object
+	# with baud=500000, or simply reset the device by unplugging it and
+	# plugging it back in. Or, simply comment this line out, because at the
+	# time of writing we don't run out of bandwidth for the speed we're
+	# polling the PIDs at.
+	elm.tryBaudrate(500000)
+
+	print("Device reports as: %s @ %d bps" % (elm.id, elm.baudrate))
 
 	while True:
 		# Iteratively fetch all PIDs in Mode 01
 		for pid in pids.__pids[0x01]:
 			try:
 				res = elm.fetchLiveData(pid)
-				if res is dict:
+				if res:
 					print("%s: %s %s" % (res['name'], res['value'], res['units']))
 			except Exception as e:
 				if e == 'STOPPED':
-					elm.reset()
+					elm.reset(1) # warm reset, keep baud rate.
+					time.sleep(1) # wait 1 second before trying again.
 				else:
 					print e
 #			time.sleep(0.5) # May need adjusting, depending on your ELM327
-		print("")
+
+		print("") # Blank line when we start from PID 01 again.

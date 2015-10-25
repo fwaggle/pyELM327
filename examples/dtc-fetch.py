@@ -5,7 +5,7 @@ sys.path.append(".")
 sys.path.append("..")
 from elm327 import elm327, pids
 
-with elm327.ELM327('/dev/ttyUSB0') as elm:
+with elm327.ELM327('/dev/ttyUSB0', debug=0) as elm:
 	"""
 	Hopefully will print all Diagnostic Trouble Codes stored on the ECU. Some 
 	manufacturers are shady with this stuff so it doesn't always work.
