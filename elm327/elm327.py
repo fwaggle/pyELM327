@@ -150,6 +150,9 @@ class ELM327(object):
 	def write(self, data, nowait=None):
 		"""
 		Send raw data to the ELM327. For most features this shouldn't be necessary.
+
+		If nowait is non-zero, don't wait for a > prompt to appear in the buffer,
+		just send immediately. Useful for resetting the device.
 		"""
 
 		if self.__debug:
