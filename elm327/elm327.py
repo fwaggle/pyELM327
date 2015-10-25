@@ -208,11 +208,43 @@ class ELM327(object):
 		result = self.expect('^[0-9\.]+V')
 		return result
 
+	def fetchSupportedPIDsLive(self):
+		"""
+		Fetch a list of supported PIDs from Live Data (Mode 01)
+
+		Returns a dictionary where the indexes are PIDs and the value
+		is either 0 or 1 depending on whether it's supported or not.
+
+		Note we don't actually report what PIDs the ECU supports,
+		we only report the PIDs that the ECU *and* the library supports.
+		"""
+		global pidlist # Nasty, but I don't know a better way yet
+
+		# send request
+		self.write('0100')
+		result = self.expect('^41 ')
+		#result = '41 BE 1F A8 13' # test data from Wikipedia
+		result = result[3:] # chomp response header
+
+		flags = int(result.replace(' ', ''), 16) # convert to integer
+		supported = dict()
+
+		for flag in range(31, -1, -1): # abomination!
+			enabled = flags & (1 << (flag))
+			if enabled > 0 and 32-flag in pidlist[01]:
+				supported[("%02X" % (32-flag))] = 1
+			#else:
+			#	supported[32-flag] = 0
+
+		return supported
+
 	def fetchLiveData(self, reqPID):
 		"""
 		Fetch Live Data at the requested PID from ECU.
 
-
+		Will raise an exception if the PID is unsupported by the library,
+		but doesn't check it's supported by the ECU - you'll get "NO DATA"
+		if that's the case.
 		"""
 		global pidlist # Nasty, but I don't know a better way yet
 		
