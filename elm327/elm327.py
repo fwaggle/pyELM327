@@ -89,25 +89,27 @@ class ELM327(object):
 		# set the baud rate timeout - my python code isn't fast enough for 75ms
 		# without getting the response in the old baud rate
 		self.write('ATBRT 00')
-		result = self.expect('^OK')
+		result = self.expect('^OK', 200)
 		if result != 'OK':
 			raise Exception('Couldn\'t set Baud Rate Timeout (AT BRT)')
 
 		# try to set the baud rate to 115200
 		self.write('ATBRD ' + divisor)
-		result = self.expect('^OK')
+		result = self.expect('^OK', 200)
 		if result != 'OK':
 			raise Exception('Couldn\'t set Baud Rate Divisor (AT BRD)')
 		self.baudrate = rate
 		
 		# we should get ELM327 at the new baud rate if it worked.
-		result = self.expect('^ELM327')
-
-		print "Res: %s" % result
+		# it might take a bit though, normally about 1.2s, wait 5s instead.
+		result = self.expect('^ELM327', 5000)
 
 		# if we get header at new baud rate, ELM is expecting CR at new baud rate.
-		self.write('', 1)
-		print "result: %s" % result
+		if result[0:6] == 'ELM327':
+			self.write('', 1)
+		else:
+			# guess it didn't work.
+			raise Exception('Baud rate change failed - didn\'t receive header')
 
 	@property
 	def baudrate(self):
