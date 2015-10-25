@@ -223,7 +223,6 @@ class ELM327(object):
 
 		# send request for first batch
 		for i in range(0, 0x81, 32):
-			print i
 			self.write('01 %2X' % i)
 			result = self.expect('^41 ')
 			#result = '%2X BE 1F A8 13' % i # test data from Wikipedia
