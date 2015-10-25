@@ -24,7 +24,6 @@ class ELM327(object):
 
 	id = None
 
-
 	def __init__(self, port, debug=0, baud=38400, rtscts=0, xonxoff=0):
 		self.__debug = debug
 		self.__ser = serial.Serial(port, baud, timeout=5, rtscts=rtscts, xonxoff=xonxoff)
@@ -63,7 +62,6 @@ class ELM327(object):
 		result = self.expect('^OK', 200)
 		if result != 'OK':
 			raise Exception('Setting Protocol to AUTO failed.')
-
 
 	def tryBaudrate(self, rate=38400):
 		"""
