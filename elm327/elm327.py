@@ -161,14 +161,37 @@ class ELM327(object):
 		self.__ser.flushOutput()
 		self.__ser.write(data + '\r')
 
-	def expect(self, pattern):
+	def expect(self, pattern, timeout=None):
+		"""
+		General purpose function for waiting for an expected response.
+
+		This function will return the first line that matches the pattern
+		specified (regex supported), and will throw away all lines prior to it.
+
+		It will also stop and return 'NO DATA' if the timeout is reached, or if
+		'NO DATA' is received from ELM327. If 'STOPPED' or other error condition
+		is returned it'll raise a matching exception.
+
+		Specify an optional timeout in milliseconds. Timeout = None will wait
+		forever.
+		"""
+		start = time.time()
+
 		if self.__debug:
 			print "Expect: '%s'" % pattern
+
 		while True:
+			# check if timeout is up
+			if timeout:
+				if ((time.time() - start) * 1000) > timeout:
+					return 'NO DATA'
+
+			# check for new data on serial port
 			n = self.__ser.inWaiting()
 			if n > 0:
 				self.__readBuffer += self.__ser.read(n)
 
+			# examine buffer
 			if self.__readBuffer.count('\r') > 0:
 				lines = self.__readBuffer.split('\r')
 
@@ -193,12 +216,14 @@ class ELM327(object):
 						raise Exception('UNKNOWN COMMAND')
 					if re.search(pattern, l):
 						return l
-			
+
+			# expect('>') is a special case, because it will not end with '\r'
 			if (self.__readBuffer == '>' or self.__readBuffer == '\r>') and pattern == '>':
 				self.__readBuffer = ''
 				return '>'
 
-			time.sleep(0.1)
+			# wait 10ms and try again
+			time.sleep(0.01)
 
 	def fetchBatteryLevel(self):
 		"""
