@@ -75,11 +75,13 @@ class ELM327(object):
 		
 		# Select appropriate divisor - higher rates may cause a '?' response from ELM
 		if rate == 38400:
-			divisor = '69'
+			divisor = '68'
 		elif rate == 57600:
 			divisor = '45'
 		elif rate == 115200:
 			divisor = '23'
+		elif rate == 230400:
+			divisor = '11'
 		elif rate == 500000:
 			divisor = '08'
 		elif rate == 666700:
