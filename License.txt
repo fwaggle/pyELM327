@@ -1,4 +1,4 @@
-Copyright (c) 2015, Jamie Fraser <fwaggle@fwaggle.org> 
+Copyright (c) 2015-2017, James Fraser <fwaggle@fwaggle.org>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
