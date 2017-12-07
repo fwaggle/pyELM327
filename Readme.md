@@ -44,6 +44,8 @@ Other examples can be found in `examples/`
 
 * Need to implement proper exceptions.
 
+* Tests require a live device - I plan to fix this using a mock serial port one day.
+
 * Documentation is appalling.
 
 ## Sources and Attributions
