@@ -21,6 +21,8 @@ class ELM327(object):
 		self.id = None
 		self.version = 'UNKNOWN'
 		self.__readBuffer = ''
+		self.__echo = None
+		self.__allowlong = None
 
 		self.__ser = serial.Serial(port, baud, timeout=5, rtscts=rtscts, xonxoff=xonxoff)
 		self.write('ATI')
@@ -28,6 +30,9 @@ class ELM327(object):
 
 		# Look for the device, and initialize it
 		self.findDevice()
+
+		self.echo = False
+		self.allowlong = False
 
 		# Turn off spaces to speed up data transfer
 		self.write('ATS0')
@@ -153,6 +158,33 @@ class ELM327(object):
 	@baudrate.setter
 	def baudrate(self, rate):
 		self.__ser.baudrate = rate
+
+
+	@property
+	def echo(self):
+		return self.__echo
+
+	@echo.setter
+	def echo(self, enabled):
+		self.write('ATE' + ('1' if enabled else '0'))
+		self.expect('OK', 500)
+		self.expectDone()
+		self.__echo = enabled
+
+	@property
+	def allowlong(self):
+		return self.__allowlong
+
+	@echo.setter
+	def allowlong(self, enabled):
+		if enabled:
+			self.write('ATAL')
+		else:
+			self.write('ATNL')
+
+		self.expect('OK', 500)
+		self.expectDone()
+		self.__allowlong = enabled
 
 	# Allow object to be used with python's "with" feature
 	######################################################
