@@ -75,8 +75,10 @@ class ELM327(object):
 
 	def fetchBatteryLevel(self):
 		self.write('ATRV')
-		result = self.expect('^[0-9\.]+V', 5000)
-		return result
+		result = self.expect('^([0-9\.]+)V', 5000)
+		if result != None:
+			return result.group(1)
+		return None
 
 	# Read and write functions
 	##########################
@@ -92,6 +94,9 @@ class ELM327(object):
 
 	def expectDone(self, timeout=None):
 		self.expect('>', timeout)
+		self.__readBuffer = ''
+		self.__ser.flushInput()
+
 
 	def expect(self, pattern, timeout=None):
 		"""
