@@ -38,6 +38,8 @@ class ELM327(object):
 		self.write('ATI')
 		version = self.expect('^ELM327 v([0-9\.]+)', 500)
 		self.version = version.group(1) # TODO: Error checking
+		self.expectDone()
+
 
 	def findDevice(self, retries=2):
 		for attempt in range(retries + 1):
