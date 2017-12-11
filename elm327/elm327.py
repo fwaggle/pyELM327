@@ -54,13 +54,14 @@ class ELM327(object):
 			# It should emit a "?" in response.
 			self.write('AT ')
 			self.write('AT ')
-			self.expect('^\?', 1000)
+			self.expect('^\?', 500)
+			self.expectDone()
 
 			# Clear the input buffer and try one more time.
 			# We should get one ? and a > prompt.
 			self.__ser.flushInput()
 			self.write('AT ')
-			self.expect('^\?', 1000)
+			self.expect('^\?', 500)
 			self.expectDone()
 			return True
 
