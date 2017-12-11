@@ -25,8 +25,6 @@ class ELM327(object):
 		self.__allowlong = None
 
 		self.__ser = serial.Serial(port, baud, timeout=5, rtscts=rtscts, xonxoff=xonxoff)
-		self.write('ATI')
-		self.expectDone()
 
 		# Look for the device, and initialize it
 		self.findDevice()
