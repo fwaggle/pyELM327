@@ -7,6 +7,9 @@ Please see License.txt and Readme.md.
 """
 
 import serial, time, pprint, re
+import pids
+
+pidlist = pids.__pids
 
 class ELM327(object):
 	"""
@@ -78,6 +81,44 @@ class ELM327(object):
 		if result != None:
 			return result.group(1)
 		return None
+
+	def fetchLiveData(self, reqPID):
+		"""
+		Fetch Live Data at the requested PID from ECU.
+
+		Will raise an exception if the PID is unsupported by the library,
+		but doesn't check it's supported by the ECU - you'll get "NO DATA"
+		if that's the case.
+		"""
+
+		global pidlist # Nasty, but I don't know a better way yet
+		
+		if reqPID not in pidlist[0x01]:
+			raise KeyError('Unsupported PID 0x%02x' % reqPID)
+
+		pid = pidlist[0x01][reqPID]
+
+		# Request the data
+		self.write('01%02x1' % reqPID)
+		result = self.expect('^41', 5000)
+
+		# Test Data
+		#result = '410C0101'
+
+		if result == None:
+			val = 'NO DATA'
+		else:
+			# Apply the pattern to the response
+			m = re.match(pid['Pattern'], result)
+			if m == None or m.group(0) == None:
+				raise Exception('Malformed response')
+
+			val = pid['Value'](m)
+		
+		return {'pid': reqPID,
+				'value': val,
+				'name': pid['Name'],
+				'units': pid['Units']}
 
 	# Read and write functions
 	##########################
